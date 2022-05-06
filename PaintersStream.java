@@ -17,14 +17,19 @@ public class PaintersStream implements ForwardingStream<Painter> {
     }
 
     public PaintersStream available() {
-        return new PaintersStream(this.getStream().filter(Painter::isAvailable));
+        return new PaintersStream(this.getStream()
+                .map(Painter::available)
+                .filter(Optional::isPresent)
+                .map(Optional::get));
     }
 
     public Optional<Painter> cheapest(double sqMeters) {
         return this.getStream().min(Comparator.comparing(painter -> painter.estimateCompensation(sqMeters)));
     }
 
-    public Optional<Painter> fastest(double sqMeters) {
-        return this.getStream().min(Comparator.comparing(painter -> painter.estimateTimeToPaint(sqMeters)));
+    public Painter fastest(double sqMeters) {
+        return this.getStream()
+                .min(Comparator.comparing(painter -> painter.estimateTimeToPaint(sqMeters)))
+                .get();
     }
 }
